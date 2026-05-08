@@ -17,6 +17,7 @@ class Form extends React.Component {
 
     constructor(props) {
         super(props);
+        this.generatedUrlInputRef = React.createRef();
         this.state = {
             longURL: '',
             preferedAlias: '',
@@ -122,10 +123,41 @@ class Form extends React.Component {
         return true;
     }
 
-    copyToClipboard = () => {
-        navigator.clipboard.writeText(this.state.generatedURL)
+    copyToClipboardFallback = () => {
+        const input = this.generatedUrlInputRef.current;
+        if (!input) {
+            return false;
+        }
+
+        input.focus();
+        input.select();
+        input.setSelectionRange(0, input.value.length);
+
+        try {
+            return document.execCommand('copy');
+        } catch (error) {
+            return false;
+        }
+    }
+
+    copyToClipboard = async () => {
+        let didCopy = false;
+
+        try {
+            if (navigator.clipboard && window.isSecureContext) {
+                await navigator.clipboard.writeText(this.state.generatedURL);
+                didCopy = true;
+            }
+        } catch (error) {
+            didCopy = false;
+        }
+
+        if (!didCopy) {
+            didCopy = this.copyToClipboardFallback();
+        }
+
         this.setState({
-            toolTipMessage: 'Copied!'
+            toolTipMessage: didCopy ? 'Copied!' : 'Press Ctrl+C to copy',
         });
     }
 
@@ -228,7 +260,7 @@ class Form extends React.Component {
                         <div className="generatedurl">
                             <span>Your generated URL is: </span>
                             <div className="input-group mb-3">
-                                <input disabled type="text" value={this.state.generatedURL} className="form-control" placeholder="Generated short URL" aria-label="Generated short URL" aria-describedby="basic-addon2"/>
+                                <input ref={this.generatedUrlInputRef} readOnly type="text" value={this.state.generatedURL} className="form-control" placeholder="Generated short URL" aria-label="Generated short URL" aria-describedby="basic-addon2"/>
                                 <div>
                                     <OverlayTrigger
                                         key={'top'}
