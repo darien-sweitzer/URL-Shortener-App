@@ -2,6 +2,8 @@
 
 A URL shortener app built with React, Flask, and Firebase.
 
+React and Python Flask-based URL shortener implementing custom alias generation, Firebase Realtime Database storage, and redirect routing. Supports URL validation, short link creation, clipboard copy functionality, error handling, and Heroku deployment via a full-stack web application architecture.
+
 ## Features
 - Shorten long URLs
 - Optional custom aliases
